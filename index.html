@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Workout Logger (Web)</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Dexie (IndexedDB ラッパー) -->
+  <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.7/dist/dexie.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Workout Logger</h1>
+    <nav>
+      <button id="tab-input" class="tab active">入力/一覧</button>
+      <button id="tab-charts" class="tab">グラフ</button>
+      <button id="tab-backup" class="tab">バックアップ</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 入力/一覧 -->
+    <section id="panel-input" class="panel active">
+      <form id="entry-form">
+        <div class="grid">
+          <label>日付
+            <input type="date" id="date" required />
+          </label>
+          <label>種目
+            <input type="text" id="exercise" placeholder="ベンチプレス" required />
+          </label>
+          <label>重量(kg)
+            <input type="number" id="weight" step="0.5" inputmode="decimal" required />
+          </label>
+          <label>回数
+            <input type="number" id="reps" inputmode="numeric" required />
+          </label>
+          <label>セット数
+            <input type="number" id="sets" inputmode="numeric" required />
+          </label>
+          <label>メモ
+            <input type="text" id="notes" placeholder="RPE7/余裕あり など" />
+          </label>
+        </div>
+        <div class="actions">
+          <input type="hidden" id="editId" />
+          <button type="submit" class="primary" id="saveBtn">保存</button>
+          <button type="button" id="clearBtn">入力クリア</button>
+        </div>
+      </form>
+
+      <div class="toolbar">
+        <input type="search" id="filterExercise" placeholder="種目で絞り込み（空で全件）" />
+        <button id="clearFilterBtn">クリア</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="list">
+          <thead>
+            <tr>
+              <th>日付</th><th>種目</th><th>重量</th><th>回数</th><th>セット</th>
+              <th>Vol(kg)</th><th>1RM</th><th>メモ</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- グラフ -->
+    <section id="panel-charts" class="panel">
+      <div class="card">
+        <h2>日次総ボリューム (kg)</h2>
+        <canvas id="dailyVolumeChart" height="220"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <h2>種目別 最大重量 / 推定1RM</h2>
+          <select id="exerciseSelect"></select>
+        </div>
+        <canvas id="exerciseMaxChart" height="200"></canvas>
+        <canvas id="exercise1RMChart" height="200" style="margin-top:16px;"></canvas>
+      </div>
+    </section>
+
+    <!-- バックアップ -->
+    <section id="panel-backup" class="panel">
+      <div class="card">
+        <h2>バックアップ（端末内DB → JSON）</h2>
+        <button id="exportBtn" class="primary">JSONを書き出す</button>
+        <a id="downloadLink" style="display:none;">ダウンロード</a>
+      </div>
+      <div class="card">
+        <h2>復元（JSON → 端末内DB）</h2>
+        <input type="file" id="importFile" accept="application/json" />
+        <button id="importBtn">読み込む</button>
+        <p class="hint">※ 既存と同一IDは上書き、IDが無い/重複しないものは追加されます。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <small>データはブラウザの IndexedDB にのみ保存され、サーバには送信されません。</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
